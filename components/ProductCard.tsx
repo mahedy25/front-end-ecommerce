@@ -55,8 +55,8 @@ export default function ProductCard({ product }: { product: Product }) {
 
         <div className="flex justify-between items-end mt-4">
           <p className="text-[#046C4E] font-semibold text-base sm:text-lg">
-            ${product.offerPrice}
-            <span className="text-gray-400 line-through text-sm ml-1">${product.price}</span>
+            ${product.offerPrice.toLocaleString()}
+            <span className="text-gray-400 line-through text-sm ml-1">${product.price.toLocaleString()}</span>
           </p>
 
           {count === 0 ? (

@@ -7,42 +7,42 @@ export type Category = {
 export const categories: Category[] = [
   {
     text: 'Mercedes',
-    path: '/categories/electric-cars',
+    path: 'mercedes',
     image: '/CarsCategories/mercedes.jpg',
   },
   {
     text: 'BMW',
-    path: '/categories/suvs',
+    path: 'bmw',
     image: '/CarsCategories/bmw.jpg',
   },
   {
     text: 'Audi',
-    path: '/categories/sedans',
+    path: 'audi',
     image: '/CarsCategories/audi.jpg',
   },
   {
     text: 'Genesis',
-    path: '/categories/luxury',
+    path: 'genesis',
     image: '/CarsCategories/genesis.png',
   },
   {
     text: 'Rolls-Royce',
-    path: '/categories/sports',
+    path: 'rolls-royce',
     image: '/CarsCategories/rolls-royce.jpg',
   },
   {
     text: 'Bentley',
-    path: '/categories/hybrids',
+    path: 'bentley',
     image: '/CarsCategories/bentley.jpg',
   },
   {
     text: 'Porsche',
-    path: '/categories/pickup-trucks',
+    path: 'porsche',
     image: '/CarsCategories/porsche.jpg',
   },
   {
     text: 'Maserati',
-    path: '/categories/compact',
+    path: 'maserati',
     image: '/CarsCategories/maserati.jpg',
   },
 ]
