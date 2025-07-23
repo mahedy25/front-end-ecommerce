@@ -30,8 +30,7 @@ export default function Hero() {
                   src={slide.image}
                   alt={slide.title}
                   layout='fill'
-                  objectFit='cover'
-                  className='brightness-[0.9]'
+                  className='object-cover brightness-[0.9]'
                   priority
                 />
                 <motion.div
