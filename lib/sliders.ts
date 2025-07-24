@@ -10,12 +10,12 @@ export type Slide = {
 }
 
 export const slides: Slide[] = [
-    {
+  {
     id: 1,
     image: '/HeroCars/mercedes-benz-AMG-GT.jpg',
     title: 'Rugged and Ready',
     description: 'Experience the ruggedness and readiness of Mercedes-Benz AMG GT.',
-    link: '',
+    link: '/categories/mercedes',
     cta: 'See Mercedes',
   },
   {
@@ -23,15 +23,16 @@ export const slides: Slide[] = [
     image: '/HeroCars/bmw-M3-GTS.jpg',
     title: 'Luxury Meets Performance',
     description: 'Experience the epitome of luxury and performance with BMW M3 GTS.',
-    link: '',
+    link: '/categories/bmw',
     cta: 'View BMW',
   },
-    {
+  {
     id: 3,
     image: '/HeroCars/audi-A4.jpg',
     title: 'Drive the Future Today',
     description: 'Audi A4: Unleash the Future of Driving.',
-    link: '',
+    link: '/categories/audi',
     cta: 'Explore AUDI',
   },
 ]
+
