@@ -4,7 +4,8 @@ import './globals.css'
 import Header from '../components/Header'
 import Footer from '@/components/Footer'
 import { Poppins } from 'next/font/google'
-import { SearchProvider } from './context/SearchContext'
+import { AppProvider } from './context/AppContext'
+import { Toaster } from 'sonner'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -24,11 +25,15 @@ export default function RootLayout({
       <body
         className={`${poppins.className} antialiased px-4 md:px-8 lg:px-12 text-[#333333] scroll-smooth`}
       >
-        <SearchProvider>
+        <AppProvider>
+          <Toaster richColors position="top-center" />
           <Header />
           {children}
           <Footer />
-        </SearchProvider>
+        </AppProvider>
+         
+
+      
       </body>
     </html>
   )

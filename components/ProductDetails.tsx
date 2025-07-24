@@ -4,10 +4,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import ReviewSection from './ratings-review/ReviewSection'
-import { products } from '@/lib/dummyProducts' // Adjust path
-import ProductCard from './ProductCard' // Adjust path
+import { products } from '@/lib/dummyProducts' // Adjust path if needed
+import ProductCard from './ProductCard' // Adjust path if needed
 import { Product } from '@/lib/types'
- // Adjust path
+import { useAppContext } from '@/app/context/AppContext' // <-- import
 
 type Props = {
   product: Product
@@ -15,6 +15,7 @@ type Props = {
 
 export default function ProductDetails({ product }: Props) {
   const [thumbnail, setThumbnail] = useState(product.image?.[0] ?? '')
+  const { addToCart } = useAppContext()
 
   // Calculate average rating safely
   const average =
@@ -24,13 +25,18 @@ export default function ProductDetails({ product }: Props) {
 
   // Filter related products safely
   const relatedProducts = Array.isArray(products)
-    ? products.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 4)
+    ? products.filter(
+        (item) => item.category === product.category && item.id !== product.id
+      ).slice(0, 4)
     : []
 
   // Defensive split description
   const descriptionPoints: string[] =
     typeof product.description === 'string'
-      ? product.description.split('.').map((p) => p.trim()).filter(Boolean)
+      ? product.description
+          .split('.')
+          .map((p) => p.trim())
+          .filter(Boolean)
       : []
 
   // Defensive image array
@@ -49,7 +55,10 @@ export default function ProductDetails({ product }: Props) {
             All Products
           </Link>
           <span>/</span>
-          <Link href={`/categories/${product.category.toLowerCase()}`} className="hover:underline text-gray-500">
+          <Link
+            href={`/categories/${product.category.toLowerCase()}`}
+            className="hover:underline text-gray-500"
+          >
             {product.category}
           </Link>
           <span>/</span>
@@ -107,7 +116,9 @@ export default function ProductDetails({ product }: Props) {
 
           {/* Product Info */}
           <div className="flex-1">
-            <h1 className="text-3xl sm:text-4xl font-bold leading-tight mb-2">{product.title}</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold leading-tight mb-2">
+              {product.title}
+            </h1>
 
             {/* Rating below title */}
             <div className="flex items-center gap-1 mb-4">
@@ -125,19 +136,27 @@ export default function ProductDetails({ product }: Props) {
                   />
                 </svg>
               ))}
-              <span className="text-xs text-gray-500 ml-2">({product.ratings.length} ratings)</span>
+              <span className="text-xs text-gray-500 ml-2">
+                ({product.ratings.length} ratings)
+              </span>
             </div>
 
             {/* Pricing */}
             <div className="text-lg sm:text-xl font-medium mb-4">
-              <span className="text-indigo-600">${product.offerPrice.toLocaleString()}</span>
-              <span className="text-sm text-gray-400 line-through ml-2">${product.price.toLocaleString()}</span>
+              <span className="text-indigo-600">
+                ${product.offerPrice.toLocaleString()}
+              </span>
+              <span className="text-sm text-gray-400 line-through ml-2">
+                ${product.price.toLocaleString()}
+              </span>
             </div>
 
             <p className="text-sm text-gray-600 mb-6">(Inclusive of all taxes)</p>
 
             {/* Description */}
-            <h2 className="text-base sm:text-lg font-semibold mb-2">About This Product</h2>
+            <h2 className="text-base sm:text-lg font-semibold mb-2">
+              About This Product
+            </h2>
             <ul className="list-disc list-inside text-gray-700 text-sm space-y-1 mb-8">
               {descriptionPoints.length > 0 ? (
                 descriptionPoints.map((point: string, idx: number) => (
@@ -149,7 +168,10 @@ export default function ProductDetails({ product }: Props) {
             </ul>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button className="w-full py-3 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-800 transition">
+              <button
+                className="w-full py-3 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-800 transition"
+                onClick={() => addToCart(product)}
+              >
                 Add to Cart
               </button>
               <button className="w-full py-3 rounded-md text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white transition">
@@ -160,7 +182,10 @@ export default function ProductDetails({ product }: Props) {
         </div>
 
         {/* Reviews */}
-        <ReviewSection initialRatings={product.ratings} initialReviews={product.reviews || []} />
+        <ReviewSection
+          initialRatings={product.ratings}
+          initialReviews={product.reviews || []}
+        />
 
         {/* Related Products */}
         <div className="mt-16">
