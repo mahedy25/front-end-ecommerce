@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Search, ShoppingCart, Menu, X } from 'lucide-react'
@@ -14,7 +14,7 @@ const lobster = Lobster({ weight: '400', subsets: ['latin'] })
 
 const navLinks = [
   { name: 'Home', href: '/' },
-  { name: 'All Products', href: '/all-products' },
+  { name: 'All', href: '/all-products' },
   { name: 'About', href: '/about' },
   { name: 'Contact', href: '/contact' },
 ]
@@ -22,37 +22,38 @@ const navLinks = [
 export default function Header() {
   const pathname = usePathname()
   const router = useRouter()
-  const [open, setOpen] = React.useState(false)
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false)
-  const [showProfileMenu, setShowProfileMenu] = React.useState(false)
-  const [showLoginForm, setShowLoginForm] = React.useState(false)
-  const [showMobileSearch, setShowMobileSearch] = React.useState(false)
-  const profileMenuRef = React.useRef<HTMLDivElement>(null)
-  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [showLoginForm, setShowLoginForm] = useState(false)
+  const [searchActive, setSearchActive] = useState(false)
+
+  const profileMenuRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const { cart, searchQuery, setSearchQuery } = useAppContext()
-
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0)
+
+  const toggleMenu = (type: 'menu' | 'search') => {
+    if (type === 'menu') {
+      setSearchActive(false)
+      setMenuOpen((prev) => !prev)
+    } else {
+      setMenuOpen(false)
+      setSearchActive((prev) => !prev)
+    }
+  }
 
   const handleSearch = () => {
     const trimmed = searchQuery.trim()
     if (trimmed) {
-      setShowMobileSearch(false)
+      setSearchActive(false)
       router.push(`/all-products?q=${encodeURIComponent(trimmed)}`)
     }
   }
 
-  const toggleMenu = () => {
-    if (showMobileSearch) setShowMobileSearch(false)
-    setOpen((prev) => !prev)
-  }
-
-  const toggleSearch = () => {
-    if (open) setOpen(false)
-    setShowMobileSearch((prev) => !prev)
-  }
-
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
         profileMenuRef.current &&
@@ -62,73 +63,82 @@ export default function Header() {
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  React.useEffect(() => {
-    if (showMobileSearch && inputRef.current) {
+  useEffect(() => {
+    if (searchActive && inputRef.current) {
       inputRef.current.focus()
     }
-  }, [showMobileSearch])
+  }, [searchActive])
 
   return (
     <>
       <header className="relative z-50 bg-white border-b border-gray-200">
-        <main className="flex items-center justify-between px-4 md:px-16 lg:px-24 xl:px-32 py-5">
+        <main className="flex items-center justify-between px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 py-4">
+          {/* Logo */}
           <Link
             href="/"
-            className={`${lobster.className} text-2xl md:text-3xl mt-1 lg:text-4xl text-[#046C4E] select-none z-50`}
+            className={`${lobster.className} text-2xl sm:text-3xl lg:text-4xl text-[#046C4E] select-none z-50`}
           >
             PremuimCars
           </Link>
 
-          <div className="hidden lg:flex items-center w-full ml-auto justify-end gap-10">
-            <div className="flex items-center gap-8">
-              <div className="flex items-center gap-6">
-                {navLinks.map((link) => {
-                  const isActive = pathname === link.href
-                  return (
-                    <Link
-                      key={link.name}
-                      href={link.href}
-                      className={`relative text-sm font-medium tracking-wider uppercase hover:text-[#0F52BA] transition-colors duration-300 group ${
-                        isActive ? 'text-[#0F52BA]' : 'text-gray-700'
+          {/* Desktop nav */}
+          <div className="hidden lg:flex items-center justify-end gap-10 ml-auto w-full">
+            <nav className="flex items-center gap-8">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={`relative text-sm font-medium uppercase tracking-wide hover:text-[#0F52BA] transition ${
+                      isActive ? 'text-[#0F52BA]' : 'text-gray-700'
+                    } group`}
+                  >
+                    {link.name}
+                    <span
+                      className={`absolute bottom-0 top-6 left-0 h-[2px] bg-[#0F52BA] transition-all duration-300 ease-in-out ${
+                        isActive ? 'w-full' : 'w-0 group-hover:w-full'
                       }`}
-                    >
-                      {link.name}
-                      <span
-                        className={`absolute bottom-0 top-6 left-0 h-[2px] bg-[#0F52BA] transition-all duration-300 ease-in-out ${
-                          isActive ? 'w-full' : 'w-0 group-hover:w-full'
-                        }`}
-                      />
-                    </Link>
-                  )
-                })}
-              </div>
+                    />
+                  </Link>
+                )
+              })}
+            </nav>
 
-              <div className="hidden md:flex items-center text-sm gap-2 border-2 border-[#046C4E] rounded-full px-4 py-2 bg-white shadow-sm">
-                <input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  className="w-full bg-transparent outline-none placeholder-gray-400 text-sm px-1 py-0.5"
-                  type="text"
-                  placeholder="Search products"
-                />
-                <button onClick={handleSearch}>
-                  <Search size={18} />
-                </button>
-              </div>
+            {/* Only show full search bar in xl screens and up */}
+            <div className="hidden xl:flex items-center border border-[#046C4E] rounded-full px-4 py-2 shadow-sm bg-white">
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                className="w-full bg-transparent outline-none placeholder-gray-400 text-sm px-1 py-0.5"
+                type="text"
+                placeholder="Search products"
+              />
+              <button onClick={handleSearch}>
+                <Search size={18} />
+              </button>
             </div>
 
+            {/* Show search button in lg only */}
+            <Button
+              onClick={() => toggleMenu('search')}
+              variant="outline"
+              className="lg:flex xl:hidden px-2 py-1 border-[#046C4E]"
+            >
+              <Search size={18} />
+            </Button>
+
+            {/* Cart & profile */}
             <div className="flex items-center gap-6">
               <Link href="/cart">
-                <div className="relative cursor-pointer text-gray-700 hover:text-[#046C4E] transition duration-300">
+                <div className="relative cursor-pointer text-gray-700 hover:text-[#046C4E] transition">
                   <ShoppingCart size={22} />
                   {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-3 text-xs font-bold text-white bg-[#046C4E] w-[20px] h-[20px] rounded-full flex items-center justify-center leading-none select-none">
+                    <span className="absolute -top-2 -right-3 text-xs font-bold text-white bg-[#046C4E] w-[20px] h-[20px] rounded-full flex items-center justify-center">
                       {cartCount}
                     </span>
                   )}
@@ -181,48 +191,47 @@ export default function Header() {
             </div>
           </div>
 
-          {/* MOBILE: Fixed Search button top-left */}
-          <div className="lg:hidden">
+          {/* Mobile buttons */}
+          <div className="lg:hidden flex items-center gap-2">
             <Button
               variant="outline"
-              className="fixed top-6 right-18 md:right-25 z-60 px-3 py-1.5 text-sm shadow-md bg-white border border-[#046C4E]"
-              onClick={toggleSearch}
+              className="text-sm shadow-sm border border-[#046C4E] px-3 py-1.5"
+              onClick={() => toggleMenu('search')}
             >
-              Search
+              <Search size={18} />
             </Button>
+            <button
+              onClick={() => toggleMenu('menu')}
+              aria-label="Toggle menu"
+              className="w-10 h-10 bg-[#046C4E] text-white rounded-full flex items-center justify-center z-50"
+            >
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
-
-          <button
-            onClick={toggleMenu}
-            aria-label="Toggle menu"
-            className="fixed top-4 right-4 w-[50px] h-[50px] lg:hidden bg-[#046C4E] text-white rounded-full justify-center items-center flex transition duration-300 z-[60]"
-          >
-            {open ? <X size={28} /> : <Menu size={28} />}
-          </button>
         </main>
 
-        {/* Mobile search bar */}
-        {showMobileSearch && (
-          <div className="w-full md:px-16 lg:px-24 xl:px-32 py-4 border-b border-gray-200 bg-white flex flex-col md:flex-row gap-5 justify-center items-center">
+        {/* Mobile Search Bar */}
+        {searchActive && (
+          <div className="px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 py-4 border-b border-gray-200 bg-white flex flex-col sm:flex-row gap-4 sm:gap-6 items-center justify-center">
             <input
               ref={inputRef}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Search for a product"
-              className="border-2 border-[#046C4E] w-full max-w-md px-4 py-2 rounded-full text-base text-gray-800 placeholder-gray-400 shadow-sm outline-none transition focus:ring-2 focus:ring-[#046C4E]"
+              className="w-full max-w-md border border-[#046C4E] px-4 py-2 rounded-full text-base text-gray-800 placeholder-gray-400 shadow-sm outline-none focus:ring-2 focus:ring-[#046C4E]"
             />
-            <div>
+            <div className="flex gap-2">
               <Button
                 onClick={handleSearch}
-                className="ml-4 bg-[#046C4E] text-white px-5 py-2 rounded-full shadow-md hover:bg-[#034736] transition text-sm"
+                className="bg-[#046C4E] text-white px-5 py-2 rounded-full text-sm"
               >
                 Search
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => setShowMobileSearch(false)}
-                className="ml-4 bg-red-900 text-white px-5 py-2 rounded-full shadow-md hover:bg-red-700 transition text-sm"
+                onClick={() => setSearchActive(false)}
+                className="bg-red-700 text-white px-5 py-2 rounded-full text-sm"
               >
                 Cancel
               </Button>
@@ -230,35 +239,51 @@ export default function Header() {
           </div>
         )}
 
-        {/* Mobile sliding menu */}
-        {open && (
-          <div className="fixed top-15 left-0 w-full bg-white shadow-lg py-6 px-6 flex flex-col gap-5 lg:hidden z-40 max-h-[calc(100vh-64px)] overflow-y-auto">
+        {/* Mobile Menu */}
+        {menuOpen && (
+          <div className="fixed top-16 left-0 w-full bg-white shadow-lg py-6 px-6 flex flex-col gap-5 lg:hidden z-40 max-h-[calc(100vh-64px)] overflow-y-auto">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                onClick={() => setOpen(false)}
-                className="w-full text-gray-700 text-[15px] font-medium tracking-wide uppercase py-2 transition hover:text-[#046C4E]"
+                onClick={() => setMenuOpen(false)}
+                className="text-gray-700 text-[15px] font-medium uppercase tracking-wide py-2 hover:text-[#046C4E]"
               >
                 {link.name}
               </Link>
             ))}
 
+            <Link
+              href="/cart"
+              onClick={() => setMenuOpen(false)}
+              className="relative flex items-center gap-2 text-gray-700 hover:text-[#046C4E] transition text-[15px]"
+            >
+              <div className="relative">
+                <ShoppingCart size={22} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 text-xs font-bold text-white bg-[#046C4E] w-[18px] h-[18px] rounded-full flex items-center justify-center leading-none">
+                    {cartCount}
+                  </span>
+                )}
+              </div>
+              <span>Cart</span>
+            </Link>
+
             {isLoggedIn ? (
               <>
                 <Link
                   href="/orders"
-                  onClick={() => setOpen(false)}
-                  className="w-full px-4 py-2 text-[15px] font-semibold rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 text-center"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full text-center py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold text-[15px]"
                 >
                   My Orders
                 </Link>
                 <button
                   onClick={() => {
                     setIsLoggedIn(false)
-                    setOpen(false)
+                    setMenuOpen(false)
                   }}
-                  className="w-full px-4 py-2 text-[15px] font-semibold rounded-full bg-[#046C4E] hover:bg-[#6F42C1] text-white"
+                  className="w-full py-2 rounded-full bg-[#046C4E] hover:bg-[#6F42C1] text-white font-semibold text-[15px]"
                 >
                   Logout
                 </button>
@@ -266,10 +291,10 @@ export default function Header() {
             ) : (
               <button
                 onClick={() => {
-                  setOpen(false)
+                  setMenuOpen(false)
                   setShowLoginForm(true)
                 }}
-                className="w-full px-4 py-2 text-[15px] font-semibold rounded-full bg-[#046C4E] hover:bg-[#6F42C1] text-white transition"
+                className="w-full py-2 rounded-full bg-[#046C4E] hover:bg-[#6F42C1] text-white font-semibold text-[15px]"
               >
                 Log In
               </button>
@@ -278,7 +303,7 @@ export default function Header() {
         )}
       </header>
 
-      {/* Login modal */}
+      {/* Login Modal */}
       <Login isOpen={showLoginForm} onClose={() => setShowLoginForm(false)} />
     </>
   )

@@ -1,5 +1,5 @@
 export type Product = {
-  id: string // or number, pick one consistently
+  id: string 
   title: string
   price: number
   offerPrice: number
@@ -11,4 +11,13 @@ export type Product = {
   instock: string
   ratings: number[]
   reviews?: { rating: number; comment: string }[]
+}
+
+export type Address = {
+  name: string
+  fullAddress: string
+  city: string
+  state: string
+  countryCode: string
+  phone: string
 }
