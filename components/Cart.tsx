@@ -6,15 +6,16 @@ import { Trash2, ChevronLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useAppContext } from '@/app/context/AppContext'
-import { Address } from '@/lib/types'
+import { Address, Order } from '@/lib/types'
 
 export default function Cart() {
-  const { cart: products, updateQuantity, removeFromCart } = useAppContext()
+  const { cart: products, updateQuantity, removeFromCart, clearCart } = useAppContext()
   const router = useRouter()
 
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([])
   const [savedAddress, setSavedAddress] = useState<Address | null>(null)
   const [showAddressDropdown, setShowAddressDropdown] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState('COD')
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -61,7 +62,6 @@ export default function Cart() {
     setSavedAddresses(updated)
     localStorage.setItem('user-addresses', JSON.stringify(updated))
 
-    // Reset selected if deleted address was active
     if (JSON.stringify(savedAddresses[index]) === JSON.stringify(savedAddress)) {
       if (updated.length > 0) {
         setSavedAddress(updated[0])
@@ -75,23 +75,46 @@ export default function Cart() {
     toast.success('Address deleted')
   }
 
+  const subtotal = products.reduce((sum, p) => sum + p.offerPrice * p.quantity, 0)
+  const tax = subtotal * 0.02
+  const shippingFee = subtotal > 100 ? 0 : 10
+  const total = subtotal + tax + shippingFee
+
   const handlePlaceOrder = () => {
     if (!savedAddress) {
       toast.error('Please add a delivery address before placing order.')
       return
     }
-    const paymentMethod = (document.getElementById('paymentMethod') as HTMLSelectElement)?.value
-    if (paymentMethod === 'Online') {
-      router.push('/checkout')
-    } else {
-      toast.success('Order placed with Cash On Delivery!')
+    if (products.length === 0) {
+      toast.error('Your cart is empty.')
+      return
     }
-  }
 
-  const subtotal = products.reduce((sum, p) => sum + p.offerPrice * p.quantity, 0)
-  const tax = subtotal * 0.02
-  const shippingFee = subtotal > 100 ? 0 : 10
-  const total = subtotal + tax + shippingFee
+    // Use timestamp string as order id
+    const orderId = Date.now().toString()
+
+    const newOrder: Order = {
+      id: orderId,
+      items: products,
+      address: savedAddress,
+      amount: total,
+      paymentType: paymentMethod,
+      orderDate: new Date().toISOString(),
+      isPaid: paymentMethod === 'Online' ? false : false, // extend as needed
+    }
+
+    const existingOrdersRaw = localStorage.getItem('user-orders')
+    const existingOrders: Order[] = existingOrdersRaw ? JSON.parse(existingOrdersRaw) : []
+
+    const updatedOrders = [...existingOrders, newOrder]
+    localStorage.setItem('user-orders', JSON.stringify(updatedOrders))
+
+    toast.success('Order placed successfully!')
+
+    clearCart()
+
+    router.push('/orders')
+  }
 
   return (
     <main className="min-h-screen px-4 sm:px-6 md:px-10 py-10 md:py-14 max-w-7xl mx-auto flex flex-col lg:flex-row gap-10">
@@ -263,7 +286,8 @@ export default function Cart() {
           <select
             id="paymentMethod"
             className="w-full border border-gray-300 bg-white px-3 py-2 rounded text-sm cursor-pointer"
-            defaultValue="COD"
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
           >
             <option value="COD">Cash On Delivery</option>
             <option value="Online">Online Payment</option>

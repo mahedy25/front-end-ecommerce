@@ -12,6 +12,7 @@ type AppContextType = {
   addToCart: (product: Product) => void
   updateQuantity: (id: string, qty: number) => void
   removeFromCart: (id: string) => void
+  clearCart: () => void
   searchQuery: string
   setSearchQuery: (query: string) => void
   handleSearch: () => void
@@ -24,6 +25,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [lastAddedProduct, setLastAddedProduct] = useState<Product | null>(null)
   const router = useRouter()
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedCart = localStorage.getItem('cart')
+      if (storedCart) {
+        setCart(JSON.parse(storedCart))
+      }
+    }
+  }, [])
+
+  // Sync cart to localStorage on change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cart', JSON.stringify(cart))
+    }
+  }, [cart])
 
   const addToCart = (product: Product) => {
     setCart((prev) => {
@@ -47,8 +65,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const removeFromCart = (id: string) => {
     setCart((prev) => prev.filter((item) => item.id !== id))
+    toast.success('Product removed from cart')
   }
 
+  const clearCart = () => {
+    setCart([])
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('cart')
+    }
+  }
+
+  // Show success notification when product is added or quantity is increased
   useEffect(() => {
     if (!lastAddedProduct) return
 
@@ -62,6 +89,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setLastAddedProduct(null)
   }, [cart, lastAddedProduct])
 
+  // Search functionality
   const handleSearch = () => {
     const trimmed = searchQuery.trim()
     if (!trimmed) return
@@ -70,7 +98,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AppContext.Provider
-      value={{ cart, addToCart, updateQuantity, removeFromCart, searchQuery, setSearchQuery, handleSearch }}
+      value={{
+        cart,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+        searchQuery,
+        setSearchQuery,
+        handleSearch,
+      }}
     >
       {children}
     </AppContext.Provider>

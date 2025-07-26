@@ -24,7 +24,7 @@ export default function Header() {
   const router = useRouter()
 
   const [menuOpen, setMenuOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(true)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [showLoginForm, setShowLoginForm] = useState(false)
   const [searchActive, setSearchActive] = useState(false)
@@ -163,7 +163,7 @@ export default function Header() {
                   {showProfileMenu && (
                     <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg py-2 z-50">
                       <Link
-                        href="/my-orders"
+                        href="/orders"
                         className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
                       >
                         My Orders

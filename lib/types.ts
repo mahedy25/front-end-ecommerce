@@ -1,5 +1,5 @@
 export type Product = {
-  id: string 
+  id: string
   title: string
   price: number
   offerPrice: number
@@ -20,4 +20,16 @@ export type Address = {
   state: string
   countryCode: string
   phone: string
+}
+
+export type CartItem = Product & { quantity: number }
+
+export type Order = {
+  id: string
+  items: CartItem[]
+  address: Address
+  amount: number
+  paymentType: string
+  orderDate: string
+  isPaid: boolean
 }
