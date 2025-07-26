@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 export default function SellerLogin() {
   const router = useRouter()
@@ -25,7 +26,7 @@ export default function SellerLogin() {
       // Dummy validation - replace with actual API call
       if (email === 'mahedyhasan873@gmail.com' && password === '123') {
         toast.success('Login successful!')
-        router.push('/seller/dashboard') // Redirect after login
+        router.push('/dashboard') // Redirect after login
       } else {
         toast.error('Invalid email or password')
       }
@@ -89,9 +90,9 @@ export default function SellerLogin() {
 
         {/* Forgot Password Link */}
         <div className="text-center mt-4">
-          <a href="/seller/forgot-password" className="text-sm text-[#046C4E] hover:underline">
+          <Link href="/seller/forgot-password" className="text-sm text-[#046C4E] hover:underline">
             Forgot your password?
-          </a>
+          </Link>
         </div>
       </div>
     </div>

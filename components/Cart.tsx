@@ -95,6 +95,7 @@ export default function Cart() {
 
     const newOrder: Order = {
       id: orderId,
+      status: '',
       items: products,
       address: savedAddress,
       amount: total,

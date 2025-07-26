@@ -25,6 +25,7 @@ export type Address = {
 export type CartItem = Product & { quantity: number }
 
 export type Order = {
+  status: string
   id: string
   items: CartItem[]
   address: Address
