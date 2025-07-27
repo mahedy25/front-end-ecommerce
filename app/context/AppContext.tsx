@@ -1,11 +1,13 @@
 'use client'
-
+import axios from '@/lib/axios'
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Product } from '@/lib/types'
 
 type CartItem = Product & { quantity: number }
+
+axios.defaults.withCredentials = true
 
 type AppContextType = {
   cart: CartItem[]
