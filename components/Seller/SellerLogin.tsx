@@ -9,7 +9,7 @@ export default function SellerLogin() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
 
-  const router = useRouter() // 🔁 Add router
+  const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -23,26 +23,22 @@ export default function SellerLogin() {
     setMessage('')
 
     try {
-      const res = await fetch('http://localhost:5000/api/seller/login', {
-        method: 'POST',
-        credentials: 'include', // for cookies
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
+      // Dummy credentials
+      const dummyEmail = 'seller@example.com'
+      const dummyPassword = '123456'
 
-      const data = await res.json()
+      // Simulate network delay
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      if (res.ok && data.success) {
+      if (email === dummyEmail && password === dummyPassword) {
         setMessage('Login successful!')
-        router.push('/dashboard') // 🔁 Redirect on success
+        router.push('/dashboard')
       } else {
-        setMessage(data.message || 'Login failed')
+        setMessage('Invalid email or password')
       }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      setMessage('Login failed due to network or server error')
+      setMessage('Login failed due to an unexpected error')
     } finally {
       setLoading(false)
     }
